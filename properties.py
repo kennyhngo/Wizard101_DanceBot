@@ -22,7 +22,18 @@ class Properties(object):
         self.filename = "properties.txt"
         self.screen = [0, 0, 1920, 1080]  # X, Y, Width, Height
         self.screen_scale = 1.0
-        while os.getcwd().split("\\")[-1] != "Wiz101_DanceBot":
+
+        # while os.getcwd().split('/')[-1] != "Wizard101_DanceBot":
+        #     os.chdir("..")
+        # return
+        # check operating system compatibility
+        if platform.system() != "Windows":
+            MessageBox(title="Unsupported Operating System",
+                       message="This operating system is currently unsupported.").show_error()
+            sys.exit(0)
+
+        parent_directory = ROOT_DIR.split("\\")[-1]
+        while os.getcwd().split("\\")[-1] != parent_directory:
             os.chdir("..")
 
     def __repr__(self):
@@ -64,5 +75,6 @@ class Properties(object):
         return (0, 0, 1920, 1080)
 
 
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 properties = Properties()
 properties.load_file()

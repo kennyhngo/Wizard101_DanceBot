@@ -14,6 +14,9 @@
     <RootNamespace>Wizard101_DanceBot</RootNamespace>
     <IsWindowsApplication>False</IsWindowsApplication>
     <InterpreterId>Global|PythonCore|3.9</InterpreterId>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <CommandLineArguments>-d</CommandLineArguments>
+    <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -25,8 +28,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="dance_game.py" />
+    <Compile Include="globals.py" />
     <Compile Include="gui.py" />
     <Compile Include="image.py" />
+    <Compile Include="logger.py" />
     <Compile Include="main.py" />
     <Compile Include="properties.py" />
     <Compile Include="textures.py" />
@@ -50,6 +55,7 @@
     <Content Include="build\main\Tree-02.toc" />
     <Content Include="build\main\warn-main.txt" />
     <Content Include="build\main\xref-main.html" />
+    <Content Include="crash.log" />
     <Content Include="dist\main.exe" />
     <Content Include="properties.txt" />
     <Content Include="requirements.txt" />

@@ -20,6 +20,36 @@ def show_error(title: str, message: str) -> None:
     root.destroy()
 
 
+class MessageBox():
+    """Shows message box without the root window."""
+
+    def __init__(self, title: str, message: str) -> None:
+        self.title = title
+        self.message = message
+
+        self.root = tk.Tk()
+        self.root.overrideredirect(1)
+        self.root.withdraw()
+
+    def destruct(self) -> None:
+        self.root.destroy()
+
+    @self_destruct
+    def show_error(self) -> None:
+        logging.error(self.title, stacklevel=4)
+        messagebox.showerror(title=self.title, message=self.message)
+
+    @self_destruct
+    def show_warning(self) -> None:
+        logging.warning(self.title, stacklevel=4)
+        messagebox.showwarning(title=self.tilte, message=self.message)
+
+    @self_destruct
+    def show_info(self) -> None:
+        logging.info(self.title, stacklevel=4)
+        messagebox.showinfo(title=self.title, message=self.message)
+
+
 def create_frame(master: tk.Frame, **kwargs) -> tk.Frame:
     return tk.Frame(master, bg=kwargs.get('bg', '#f0f0f0'), relief='raised')
 
@@ -253,7 +283,7 @@ class Playing(tk.Tk):
         if self.progress_bar['value'] < 100:
             self.progress_bar['value'] += 20
             self.label['text'] = self.update_progress_label()
-        else:
+        if self.progress_bar['value'] == 100:
             self.finished = True
 
     def stop(self) -> None:

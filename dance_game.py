@@ -2,6 +2,8 @@ import random
 import time
 from typing import List, Tuple
 
+from globals import Globals
+
 import pyautogui
 from image import *
 
@@ -58,11 +60,11 @@ def update_search() -> None:
 
     # there are only five rounds
     if turn == 5:
-        time.sleep(1) # allow time for thread in gui.py read value of turn
-        print("turn now equals 5, triggering the failsafe")
-        #pyautogui.moveTo(0, 0)
-        turn = 0 # reset turn to zero in-case user wants to play again
-        KeyboardPresser().press_key('q') # stops our application
+        time.sleep(1)  # allow time for thread in gui.py read value of turn
+        logging.debug("turn now equals 5, triggering the failsafe")
+        # pyautogui.moveTo(0, 0)
+        turn = 0  # reset turn to zero in-case user wants to play again
+        Globals.game_finished = True
 
 
 def input_moves(input_arrows: List[Arrow]) -> None:

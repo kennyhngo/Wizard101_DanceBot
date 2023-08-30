@@ -1,3 +1,6 @@
+import logging
+import os
+import sys
 import time
 import threading
 from typing import List
@@ -44,15 +47,14 @@ def finish_game(MM: DG.MouseMover, resolution: str) -> None:
 
 def play_game() -> None:
     application_closed = False
-    while not application_closed and not Globals.q_pressed:
-        # print(f'play_game(): {application_closed = }\t\t{Globals.q_pressed = }')
+    while not application_closed and not Globals.game_finished:
         DG.update_search()
 
         # Amount of time in seconds required for each frame.
         frame_duration = 1.0 / DG.refresh_rate
         time.sleep(frame_duration)
 
-        # Emergency exit the program when the mouse is in the top left corner or 'q' is pressed
+        # Emergency exit the program when the mouse is in the top left corner
         mousex, mousey = pyautogui.position()
         application_closed = mousex + mousey == 0
 
@@ -70,7 +72,13 @@ def setup(resolution: str) -> int:
     DG.properties.load_file(resolution=resolution)
 
     try:
-        w101_window = pgw.getWindowsWithTitle('Wizard101')[0]
+        possible_windows = pgw.getWindowsWithTitle('Wizard101')
+        for window in possible_windows:
+            if window.title == 'Wizard101':
+                w101_window = window
+                break
+        else:
+            raise IndexError("Wizard101 Graphical Client not found.")
 
         sizeX, sizeY = w101_window.size
         width, height = sizeX - offsetX, sizeY - offsetY
@@ -119,7 +127,8 @@ def main() -> None:
         #"""
 
         for game_index in range(0, num_games):
-            Globals.q_pressed = False
+            logging.debug(f"Playing Game {game_index + 1} of {num_games}")
+            Globals.game_finished = False
             MM = setup_game(locations, snacks, resolution)
 
             print('running Playing() in main')
@@ -141,15 +150,17 @@ def main() -> None:
                 finish_game(MM, resolution)
                 time.sleep(2) # give time for animation
             else:
+                logging.critical("Uncaught break - play.finished returned False.")
                 break
 
 
 def on_press(key: any) -> None:
-    print('Key %s pressed' % key)
+    logging.trace('Key %s pressed' % key, stacklevel=3)
     try:
         if key.char == 'q':
             Globals.q_pressed = True
-            print(f'quitting application because q key pressed')
+            logging.debug("Quitting application because q key pressed")
+            os._exit(1)
     except AttributeError:
         pass
 
@@ -160,4 +171,8 @@ def key_listener() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as exception:
+        logging.critical(repr(exception))
+        sys.exit(1)
