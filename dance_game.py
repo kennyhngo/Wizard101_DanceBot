@@ -1,3 +1,4 @@
+import logging
 import random
 import time
 from typing import List, Tuple
@@ -20,13 +21,13 @@ ARROW_TO_KEY = {
 
 
 def load_application(resolution: str) -> None:
-    print("loading application")
+    logging.info("Loading application")
     load_textures(resolution)
     generate_subicons()
     remove_duplicate_subicons()
-    # This failsafe isn't neccesary as I have built one in already. 
+    # This failsafe isn't neccesary as I have built one in already.
     pyautogui.FAILSAFE = False
-    print("finished loading")
+    logging.info("Finished loading")
 
 
 def update_search() -> None:
@@ -42,19 +43,19 @@ def update_search() -> None:
     # tries to search using subicons
     for arrow in Arrow:
         for sub_icon in arrow_subicons[arrow.value]:
-            #bounds = locate(sub_icon, screen, confidence=0.825)
+            # bounds = locate(sub_icon, screen, confidence=0.825)
             bounds = locate(sub_icon, screen, confidence=0.9)
 
             if bounds is not None:
                 moves.append(arrow)
-                time.sleep(0.15) # let time pass for next
-    #"""
+                time.sleep(0.15)  # let time pass for next
+    # """
 
     if len(moves) == turn + 3:
-        print(f"End of round {turn + 1}.")
-        time.sleep(0.5) # give time between finishing and entering keys
+        logging.debug(f"End of round {turn + 1}.")
+        time.sleep(0.5)  # give time between finishing and entering keys
         input_moves(moves)
-        time.sleep(1.75 + 0.10 * turn) # wait for game to show next round
+        time.sleep(1.75 + 0.10 * turn)  # wait for game to show next round
         moves = []
         turn += 1
 
@@ -83,8 +84,10 @@ class MouseMover():
         self.mouse_delay = 0.15  # in seconds
 
     def choose_and_moveto_location(self) -> None:
-        available_locations = [i for i, location in enumerate(self.locations) if location]
-        available_locations = [0] if available_locations == [] else available_locations
+        available_locations = [
+            i for i, location in enumerate(self.locations) if location]
+        available_locations = [
+            0] if available_locations == [] else available_locations
         location_choice = random.choice(available_locations)
         x, y = MouseMover.get_location_pixels(self.resolution)[location_choice]
         MouseMover.move_and_click(x, y, self.mouse_delay)
@@ -94,7 +97,7 @@ class MouseMover():
         return random.choice(available_snacks) if available_snacks else -1
 
     @staticmethod
-    def move_and_click(x: int, y: int, mouse_delay: float=0.15) -> None:
+    def move_and_click(x: int, y: int, mouse_delay: float = 0.15) -> None:
         """Moves mouse to (x, y) in delay seconds and left clicks."""
         pyautogui.moveTo(x, y, mouse_delay)
         pyautogui.click()
@@ -113,7 +116,7 @@ class MouseMover():
         return [(x, y) for x in x_coords]
 
     @staticmethod
-    def press_right_side_button(resolution: str, mouse_delay: float=0.15) -> None:
+    def press_right_side_button(resolution: str, mouse_delay: float = 0.15) -> None:
         """Presses PLAY in select level screen,
         NEXT after game finishes,
         and FEED PET in feed screen."""
@@ -125,7 +128,7 @@ class MouseMover():
         MouseMover.move_and_click(x, y, mouse_delay)
 
     @staticmethod
-    def press_left_side_button(resolution: str, mouse_delay: float=0.15) -> None:
+    def press_left_side_button(resolution: str, mouse_delay: float = 0.15) -> None:
         """Presses CANCEL in select level screen,
         FINISH in both feed screen and post fees screen."""
         x, y = None, None
@@ -136,7 +139,7 @@ class MouseMover():
         MouseMover.move_and_click(x, y, mouse_delay)
 
     @staticmethod
-    def press_snack(snack_index: int, resolution: str, mouse_delay:float=0.15) -> None:
+    def press_snack(snack_index: int, resolution: str, mouse_delay: float = 0.15) -> None:
         """Clicks on the snack given the snack number given (1-5)."""
         x_coords, y = None, None
         if resolution == '800x600':

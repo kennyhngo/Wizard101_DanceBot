@@ -1,3 +1,5 @@
+import atexit
+import inspect
 import logging
 import os
 import sys
@@ -9,9 +11,11 @@ import pyautogui
 import pygetwindow as pgw
 from pynput import keyboard
 
+import logger
 import dance_game as DG
-from gui import ConfigureSettings, show_error
-from properties import Globals, separate
+from globals import Globals
+from gui import MessageBox
+from properties import separate
 
 
 def setup_game(locations: List[int], snacks: List[int], resolution: str) -> DG.MouseMover:
@@ -92,8 +96,8 @@ def setup(resolution: str) -> int:
         w101_window.activate()
         w101_window.moveTo(0, 0)
     except IndexError:
-        show_error(title='Game Not Found',
-                   message='Could not find Wizard101 client running on your computer.')
+        MessageBox(title='Game Not Found',
+                   message='Could not find Wizard101 client running on your computer.').show_error()
         return 2
 
     return 0
@@ -105,7 +109,6 @@ def main() -> None:
     threading.Thread(target=key_listener, daemon=True).start()
 
     while True:
-        print('running Configure() in main')
         config = Configure()
         config.mainloop()
         locations, snacks, num_games, resolution = Configure.configure_settings
@@ -114,24 +117,24 @@ def main() -> None:
         # save configuration settings to reuse after the script has finished playing
         if return_value in [1, 2]:
             if return_value == 1:
-                show_error(title='Invalid Resolution',
-                           message='Game resolution and selected resolution do not match up.')
+                MessageBox(title='Invalid Resolution',
+                           message='Game resolution and selected resolution do not match up.').show_error()
             continue
         try:
             DG.load_application(resolution)
         except Exception as exception:
-            show_error(title='Application Load Fail',
-                       message='Failed to load application, now closing.')
-            print(exception)
+            logging.error(repr(exception))
+            MessageBox(title='Application Load Fail',
+                       message='Failed to load application, now closing.').show_error()
             return
-        #"""
 
+        logging.debug(f"{num_games = }")
         for game_index in range(0, num_games):
             logging.debug(f"Playing Game {game_index + 1} of {num_games}")
             Globals.game_finished = False
             MM = setup_game(locations, snacks, resolution)
 
-            print('running Playing() in main')
+            logging.info('running Playing() in main')
             play = Playing(resolution, num_games, game_index)
 
             progress_thread = threading.Thread(target=play_game, daemon=False)
@@ -140,15 +143,15 @@ def main() -> None:
 
             play.mainloop()
             progress_thread.join()  # wait for thread to finish before continuing
-            print(f'{progress_thread.is_alive() = }')
-            print('finishing Playing().mainloop()')
-            print(f'{play.finished = }')
+            logging.debug(
+                f'{progress_thread.is_alive() = }\t{play.finished = }')
+            logging.info('finishing Playing().mainloop()')
 
             # execute feed snack only if user did not early stop
             if play.finished:
-                print('play was finished, running post game movement')
+                logging.info('play was finished, running post game movement')
                 finish_game(MM, resolution)
-                time.sleep(2) # give time for animation
+                time.sleep(2)  # give time for animation
             else:
                 logging.critical("Uncaught break - play.finished returned False.")
                 break
@@ -166,13 +169,24 @@ def on_press(key: any) -> None:
 
 
 def key_listener() -> None:
+    logging.debug("Started keyboard listener")
     with keyboard.Listener(on_press=on_press) as listener:
         listener.join()
 
 
+def check_running_instance() -> None:
+    """Raise error if instance is already running."""
+    app_title = "W101 Pet Dance"
+    if not pgw.getWindowsWithTitle(app_title):
+        return
+    MessageBox(title='Duplicate application',
+               message='A dance bot instance is already running on your computer').show_error()
+    raise RuntimeError("An instance is already running.")
+
+
 if __name__ == "__main__":
     try:
+        check_running_instance()
         main()
     except Exception as exception:
         logging.critical(repr(exception))
-        sys.exit(1)

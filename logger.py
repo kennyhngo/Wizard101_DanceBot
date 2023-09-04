@@ -127,9 +127,13 @@ def configure_logging() -> None:
     # remove logging from PILLOW library
     logging.getLogger("PIL").propagate = False
 
+    # clear crash.log
+    crashlog_file = "crash.log"
+    open(crashlog_file, "w", encoding="utf-8").close()
+
     # set logging settings
     handler = logging.StreamHandler(
-        sys.stdout)if args.dev_mode else logging.FileHandler("crash.log")
+        sys.stdout) if args.dev_mode else logging.FileHandler(crashlog_file)
     handler.setFormatter(CustomFormatter(handler))
     root_logger.addHandler(handler)
 

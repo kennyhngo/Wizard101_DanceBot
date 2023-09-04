@@ -6,6 +6,7 @@ arrow_icons = []
 arrow_subicons = []
 properties = Properties()
 
+
 def load_textures(resolution: str) -> None:
     for arrow in Arrow:
         arrow_texture = Image.open(f"assets/{resolution}/{arrow.name}.png")

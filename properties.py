@@ -1,31 +1,18 @@
 import os
 from typing import List
+from globals import separate
 from textures import *
-
-
-class Globals:
-    """For threads to share a common variable, since globals do not work."""
-    q_pressed = False
-
-
-def separate(string: str, delimiter="=") -> List[str]:
-    """Splits the string into 2 parts based on the separater symbol."""
-    idx = string.find(delimiter)
-    return [
-        string[:idx if idx != -1 else len(string)],
-        string[idx+1:] if idx != -1 else ""
-    ]
 
 
 class Properties(object):
     def __init__(self) -> None:
+        import platform
+        import sys
+        from gui import MessageBox
         self.filename = "properties.txt"
         self.screen = [0, 0, 1920, 1080]  # X, Y, Width, Height
         self.screen_scale = 1.0
 
-        # while os.getcwd().split('/')[-1] != "Wizard101_DanceBot":
-        #     os.chdir("..")
-        # return
         # check operating system compatibility
         if platform.system() != "Windows":
             MessageBox(title="Unsupported Operating System",
@@ -36,7 +23,7 @@ class Properties(object):
         while os.getcwd().split("\\")[-1] != parent_directory:
             os.chdir("..")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.__class__.__name__}({', '.join([f'{k}={v!r}' for k, v in self.__dict__.items() if not k.startswith('_')])})"
 
     def load_file(self, resolution: str = None) -> None:
