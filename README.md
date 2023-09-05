@@ -8,7 +8,7 @@ Although it is against the ToS to be botting and using a third-party software, s
 
 ## Usage
 
-Download the latest executable bundle in the releases [here](https://github.com/kennyhngo/Wizard101_DanceBot).
+Download and extract the latest executable bundle in the releases [here](https://github.com/kennyhngo/Wizard101_DanceBot/releases).
 
 ## Instructions
 
@@ -18,8 +18,8 @@ Download the latest executable bundle in the releases [here](https://github.com/
 1. Set your in-game settings as follows:
    * UI Size: HUGE
    * Fullscreen: OFF
-1. Go to the Pet Dance game, wait near the spiral and do not open the minigame's menu.
-1. Run the executable. Do not move it out of the folder.
+1. Go to the Pet Dance game, wait near the spiral and do not open the minigame's menu (do not press `x`).
+1. Run the executable (petdance.exe), do not move it out of the folder.
 1. Enter amount of games to play.
 
 ### Locations
@@ -36,6 +36,10 @@ Selecting a snack adds that snack choice to a random choice that the script will
 
 In the case that your pet levels up, you will have to manually force stop the program by pressing the `'q'` key.
 
+## Saving
+
+You can save your most recent settings by clicking the `save` button on the bottom. Note that this will override your previous save preferences. To apply the save, click on the `play` button; you do not need to have Wizard101 running or be near the minigame for the save to be successful.
+
 ## Bug/Issue Reporting
 
-If you happen to run into any issues, please go to the [issues tab](https://github.com/kennyhngo/Wizard101_DanceBot/issues) and report it. Any video or image documentation, as well as your game client settings (and maybe operating system settings) will be very helpful. If you are able to reproduce the issue, feel free to document that as well. Furthermore, there should be a `crash.log` file that you may include to help me resolve your issue.
+If you happen to run into any issues, please go to the [issues tab](https://github.com/kennyhngo/Wizard101_DanceBot/issues) and report it. Any video or image documentation, as well as your game client settings (and maybe any operating system settings you think is important) will be very helpful. If you are able to reproduce the issue, feel free to document that as well. Furthermore, there should be a `crash.log` file that you may include to help me resolve your issue.
