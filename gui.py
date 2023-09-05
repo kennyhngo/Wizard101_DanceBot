@@ -2,6 +2,7 @@ from dataclasses import astuple, dataclass, field
 from functools import wraps
 import inspect
 import logging
+from logging import config
 import sys
 import threading
 from typing import Any, Callable, List
@@ -11,7 +12,8 @@ import tkinter.ttk as ttk
 from tkinter import font, messagebox
 
 import dance_game as DG
-from globals import Globals, separate
+import shared
+from shared import Globals
 
 
 def self_destruct(func: Callable) -> Callable:
@@ -128,6 +130,8 @@ class Configure(tk.Tk):
         frame_topright = create_frame(frame_top)
         frame_middleleft = create_frame(frame_middle)
         frame_middleright = create_frame(frame_middle)
+        frame_bottomleft = create_frame(frame_bottom)
+        frame_bottomright = create_frame(frame_bottom)
 
         # placing in grid
         frame_top.columnconfigure(0, weight=1)
@@ -136,13 +140,25 @@ class Configure(tk.Tk):
         frame_top.grid(row=0, column=0, sticky='nesw')
         frame_topleft.grid(row=0, column=0, sticky='nesw')
         frame_topright.grid(row=0, column=1, sticky='nesw')
+
         frame_middle.columnconfigure(0, weight=1)
         frame_middle.columnconfigure(1, weight=1)
         frame_middle.rowconfigure(0, weight=1)
         frame_middle.grid(row=1, column=0, sticky='nesw')
         frame_middleleft.grid(row=0, column=0, sticky='nesw')
         frame_middleright.grid(row=0, column=1, sticky='nesw')
+
+        frame_bottom.columnconfigure(0, weight=1)
+        frame_bottom.columnconfigure(1, weight=1)
+        frame_bottom.rowconfigure(0, weight=1)
         frame_bottom.grid(row=2, column=0, sticky='nesw')
+        frame_bottomleft.grid(row=0, column=0, sticky='nesw')
+        frame_bottomright.grid(row=0, column=1, sticky='nesw')
+
+        # validate configure file before consider using it
+        self.valid_settings = shared.validate_save_settings()
+
+        print(f'{self.valid_settings = }')
 
         # add location check boxes
         self.frame_locations(frame_topleft)
@@ -154,7 +170,9 @@ class Configure(tk.Tk):
         self.configure_games(frame_middleleft)
         self.configure_resolutions(frame_middleright)
 
-        tk.Button(frame_bottom, text='Start', command=self.start, relief='solid',
+        tk.Button(frame_bottomleft, text='Save', command=shared.set_save_settings, relief='solid',
+                  fg=self.fg_color, highlightbackground='#e1e1e1').pack(expand=True, fill='both', padx=10, pady=10)
+        tk.Button(frame_bottomright, text='Start', command=self.start, relief='solid',
                   fg=self.fg_color, highlightbackground='#e1e1e1').pack(expand=True, fill='both', padx=10, pady=10)
         logging.info("Finished configuration")
 
@@ -162,66 +180,61 @@ class Configure(tk.Tk):
         self.location_boxes = []
         tk.Label(frame, text='Locations to Farm', fg=self.fg_color, bg=self.bg_color,
                  font=font.Font(size=9, underline=True)).pack(padx=10, pady=(10, 0), anchor='w')
-        cities = ['Wizard City', 'Krokotopia',
-                  'Marleybone', 'Mooshu', 'Dragonspyre']
+        cities = ['Wizard City', 'Krokotopia', 'Marleybone', 'Mooshu', 'Dragonspyre']
 
-        # use default settings or previously entered settings
-        if Configure.configure_settings is None:
-            for idx, city in enumerate(cities):
-                self.location_boxes.append(
-                    tk.IntVar(value=1) if idx == 0 else tk.IntVar())
-                self.create_checkbox(
-                    frame, anchor='w', text=city, var=self.location_boxes[idx])
-        else:
-            for idx, (city, location_checked) in enumerate(zip(cities, Configure.configure_settings.locations)):
-                self.location_boxes.append(tk.IntVar(value=location_checked))
-                self.create_checkbox(
-                    frame, anchor='w', text=city, var=self.location_boxes[idx])
+        # three way nested ternary -> L = a if A else (b if B else c)
+        location_values = Globals.settings['locations'] if self.valid_settings else \
+            Configure.configure_settings.locations if Configure.configure_settings is not None else [None] * len(cities)
+        locations = zip(cities, location_values)
+
+        # use default settings or previously entered settings or previously saved settings
+        for idx, (city, location_checked) in enumerate(locations):
+            self.location_boxes.append(tk.IntVar(value=location_checked))
+            self.create_checkbox(frame, anchor='w', text=city, var=self.location_boxes[idx])
 
     def frame_snacks(self, frame: tk.Frame) -> None:
         self.snack_boxes = []
         tk.Label(frame, text='Pet Snacks to Feed', fg=self.fg_color, bg=self.bg_color,
                  font=font.Font(size=9, underline=True)).pack(padx=10, pady=(10, 0), anchor='e')
-        snacks = [f'Snack {i}' for i in range(1, 6)]
+        snacks_names = [f'Snack {i}' for i in range(1, 6)]
 
-        # use default settings or previously entered settings
-        if Configure.configure_settings is None:
-            for idx, snack in enumerate(snacks):
-                self.snack_boxes.append(tk.IntVar())
-                self.create_checkbox(frame, anchor='center',
-                                     text=snack, var=self.snack_boxes[idx])
-        else:
-            for idx, (snack, snack_checked) in enumerate(zip(snacks, Configure.configure_settings.snacks)):
-                self.snack_boxes.append(tk.IntVar(value=snack_checked))
-                self.create_checkbox(frame, anchor='center',
-                                     text=snack, var=self.snack_boxes[idx])
+        # three way nested ternary
+        snack_values = Globals.settings['snacks'] if self.valid_settings else \
+            Configure.configure_settings.snacks if Configure.configure_settings is not None else [None] * len(snacks_names)
+        snacks = zip(snacks_names, snack_values)
+
+        # use default settings or previously entered settings or previously saved settings
+        for idx, (snack, snack_checked) in enumerate(snacks):
+            self.snack_boxes.append(tk.IntVar(value=snack_checked))
+            self.create_checkbox(frame, anchor='center', text=snack, var=self.snack_boxes[idx])
 
     def configure_games(self, frame: tk.Frame) -> None:
         tk.Label(frame, text='Amount of Games', fg=self.fg_color, bg=self.bg_color,
                  font=font.Font(size=9, underline=True)).pack(padx=10, pady=0, anchor='w')
 
-        # use default settings or previously entered settings
-        if Configure.configure_settings is None or Configure.configure_settings.num_games == 1:
-            self.games = EntryWithPlaceholder(frame, placeholder="1")
-        else:
-            self.games = EntryWithPlaceholder(
-                frame, placeholder='1', text=Configure.configure_settings.num_games)
+        # three way nested ternary
+        num_games_text = Globals.settings['num_games'] if self.valid_settings else \
+            (None if Configure.configure_settings is None or Configure.configure.settings.num_games == 1 else \
+            Configure.configure.num_games)
+
+        # use default settings or previously entered settings or previously saved settings
+        self.games = EntryWithPlaceholder(frame, placeholder="1", text=num_games_text)
         self.games.pack(padx=12, pady=0, anchor='w')
 
     def configure_resolutions(self, frame: tk.Frame) -> None:
-        available_resolutions = ['800x600', '1280x800']
+        available_resolutions = [*Globals.resolutions.keys()]
         tk.Label(frame, text='Resolution', fg=self.fg_color, bg=self.bg_color,
                  font=font.Font(size=9, underline=True)).pack(padx=10, pady=0, anchor='w')
         self.resolutions = ttk.Combobox(frame, value=available_resolutions, width=16, state='readonly',
                                         foreground=self.fg_color, background=self.bg_color)
         self.resolutions.pack(padx=(12, 18))
 
-        # use default settings or previously entered settings
-        if Configure.configure_settings is None:
-            self.resolutions.current(0)
-        else:
-            self.resolutions.current(available_resolutions.index(
-                Configure.configure_settings.resolution))
+        print(f'{available_resolutions = }')
+
+        # three way nested ternary
+        # use default settings or previously entered settings or previously saved settings
+        self.resolutions.current(available_resolutions.index(Globals.settings['resolution'] if self.valid_settings else \
+            (Configure.configure_settings.resolution if Configure.configure_settings is not None else available_resolutions[0])))
 
     def create_checkbox(self, master: tk.Frame, *, anchor: str, text: str, var: tk.IntVar) -> None:
         tk.Checkbutton(master, text=text, variable=var, pady=0,
@@ -258,7 +271,7 @@ class Configure(tk.Tk):
 
 class Playing(tk.Tk):
     def __init__(self, resolution: str, num_games: int, current_game: int) -> None:
-        width, height = separate(resolution, delimiter='x')
+        width, height = shared.separate(resolution, delimiter='x')
         super().__init__()
         self.title('W101 Pet Dance')
         self.geometry(f"300x130+{width}+{int(height) // 10 * 7}")
@@ -287,17 +300,14 @@ class Playing(tk.Tk):
             frame_middle, orient='horizontal', mode='determinate', length=300-2*padx)
         self.progress_bar.grid(columnspan=3, padx=padx, pady=0)
 
-        self.label = ttk.Label(frame_top, text=self.update_progress_label(
-        ), font=font.Font(size=12, weight='bold'))
+        self.label = ttk.Label(frame_top, text=self.update_progress_label(),
+                               font=font.Font(size=12, weight='bold'))
         self.label.grid(columnspan=3, padx=padx, pady=(10, 0))
 
         # for bottom frame
-        # tk.Button(frame_bottom, text="Progress", command=self.progress).grid(
-        #     row=0, column=1, sticky='w', pady=(0, 10))
         games_progress = ttk.Label(
             frame_bottom, text=f"Game {current_game + 1} of {num_games}", font=font.Font(size=11, weight='bold'))
-        games_progress.grid(row=0, column=0, padx=padx,
-                            pady=(0, 10), sticky='w')
+        games_progress.grid(row=0, column=0, padx=padx, pady=(0, 10), sticky='w')
 
         caption = ttk.Label(frame_bottom, text="(press 'q' to quit)")
         caption.grid(row=0, column=1, padx=padx, pady=(0, 10), sticky='w')
