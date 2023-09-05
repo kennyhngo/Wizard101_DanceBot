@@ -18,11 +18,15 @@ import os
 # function for finding and writing over the init.tcl file
 def find_change_tcl():
     # find the location
-    for folderName, subfolders, filenames in os.walk('dist'):
-        if '.app' in folderName: 
-            for filename in filenames:
-                if filename == 'init.tcl':
-                    fileTCL = str(folderName + '/' + filename)
+    filename = 'init.tcl'
+    for folderName, _, filenames in os.walk('dist'):
+        if 'init.tcl' in filenames:
+            fileTCL = str(folderName + '/' + filename)
+            break
+        #if '.app' in folderName: 
+        #    for filename in filenames:
+        #        if filename == 'init.tcl':
+        #            fileTCL = str(folderName + '/' + filename)
 
     with open(fileTCL,'r') as f:
         dfAll=f.readlines()
