@@ -3,7 +3,7 @@ import random
 import time
 from typing import List, Tuple
 
-from globals import Globals
+from shared import Globals
 
 import pyautogui
 from image import *

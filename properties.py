@@ -1,6 +1,6 @@
 import os
 from typing import List
-from globals import separate
+from shared import Globals, separate
 from textures import *
 
 
@@ -18,10 +18,6 @@ class Properties(object):
             MessageBox(title="Unsupported Operating System",
                        message="This operating system is currently unsupported.").show_error()
             sys.exit(0)
-
-        parent_directory = ROOT_DIR.split("\\")[-1]
-        while os.getcwd().split("\\")[-1] != parent_directory:
-            os.chdir("..")
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({', '.join([f'{k}={v!r}' for k, v in self.__dict__.items() if not k.startswith('_')])})"
@@ -44,6 +40,10 @@ class Properties(object):
         for i, info in enumerate(screen_info):
             self.screen[i] = info
 
+    def create_configure(self) -> None:
+        """Creates configure.txt file if it does not exist."""
+        open('configure.txt', 'a+', encoding='utf-8').close()
+
     def save_file(self) -> None:
         with open(self.filename, 'w', encoding='utf-8') as properties:
             properties.write(
@@ -54,14 +54,10 @@ class Properties(object):
     @staticmethod
     def load_screen_info(resolution: str) -> List[int]:
         """Returns a tuple containing (screenX, screenY, screenWidth, screenHeight)."""
-        if resolution == '800x600':
-            return (370, 525, 75, 75)
-        if resolution == '1280x800':
-            return (600, 699, 95, 95)
-        # Catch all
-        return (0, 0, 1920, 1080)
+        return Globals.resolutions.get(resolution, (0, 0, 1920, 1080))
 
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 properties = Properties()
 properties.load_file()
+properties.create_configure()

@@ -13,7 +13,7 @@ from pynput import keyboard
 
 import logger
 import dance_game as DG
-from globals import Globals
+from shared import Globals
 from gui import MessageBox
 from properties import separate
 
@@ -112,6 +112,18 @@ def main() -> None:
         config = Configure()
         config.mainloop()
         locations, snacks, num_games, resolution = Configure.configure_settings
+
+        # overwrite file if user chooses to save current settings
+        if Globals.save_settings:
+            Globals.save_settings = False
+            with open('configure.txt', 'w', encoding='utf-8') as fp:
+                fp.writelines([f'{str(setting)}\n' for setting in Configure.configure_settings])
+            logging.info("Finished saving settings to configure.txt")
+
+        if not any(locations):
+            MessageBox(title='Invalid Selection',
+                       message='Select at least one area to play').show_info()
+            continue
         return_value = setup(resolution)
 
         # save configuration settings to reuse after the script has finished playing

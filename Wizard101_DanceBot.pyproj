@@ -56,7 +56,6 @@
     <Content Include="build\main\warn-main.txt" />
     <Content Include="build\main\xref-main.html" />
     <Content Include="crash.log" />
-    <Content Include="dist\main.exe" />
     <Content Include="properties.txt" />
     <Content Include="requirements.txt" />
   </ItemGroup>

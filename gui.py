@@ -158,8 +158,6 @@ class Configure(tk.Tk):
         # validate configure file before consider using it
         self.valid_settings = shared.validate_save_settings()
 
-        print(f'{self.valid_settings = }')
-
         # add location check boxes
         self.frame_locations(frame_topleft)
 
@@ -177,6 +175,7 @@ class Configure(tk.Tk):
         logging.info("Finished configuration")
 
     def frame_locations(self, frame: tk.Frame) -> None:
+        logging.debug("Configuring locations")
         self.location_boxes = []
         tk.Label(frame, text='Locations to Farm', fg=self.fg_color, bg=self.bg_color,
                  font=font.Font(size=9, underline=True)).pack(padx=10, pady=(10, 0), anchor='w')
@@ -193,6 +192,7 @@ class Configure(tk.Tk):
             self.create_checkbox(frame, anchor='w', text=city, var=self.location_boxes[idx])
 
     def frame_snacks(self, frame: tk.Frame) -> None:
+        logging.debug("Configuring snacks")
         self.snack_boxes = []
         tk.Label(frame, text='Pet Snacks to Feed', fg=self.fg_color, bg=self.bg_color,
                  font=font.Font(size=9, underline=True)).pack(padx=10, pady=(10, 0), anchor='e')
@@ -209,6 +209,7 @@ class Configure(tk.Tk):
             self.create_checkbox(frame, anchor='center', text=snack, var=self.snack_boxes[idx])
 
     def configure_games(self, frame: tk.Frame) -> None:
+        logging.debug("Configuring number of games")
         tk.Label(frame, text='Amount of Games', fg=self.fg_color, bg=self.bg_color,
                  font=font.Font(size=9, underline=True)).pack(padx=10, pady=0, anchor='w')
 
@@ -222,14 +223,13 @@ class Configure(tk.Tk):
         self.games.pack(padx=12, pady=0, anchor='w')
 
     def configure_resolutions(self, frame: tk.Frame) -> None:
+        logging.debug("Configuring resolution")
         available_resolutions = [*Globals.resolutions.keys()]
         tk.Label(frame, text='Resolution', fg=self.fg_color, bg=self.bg_color,
                  font=font.Font(size=9, underline=True)).pack(padx=10, pady=0, anchor='w')
         self.resolutions = ttk.Combobox(frame, value=available_resolutions, width=16, state='readonly',
                                         foreground=self.fg_color, background=self.bg_color)
         self.resolutions.pack(padx=(12, 18))
-
-        print(f'{available_resolutions = }')
 
         # three way nested ternary
         # use default settings or previously entered settings or previously saved settings
