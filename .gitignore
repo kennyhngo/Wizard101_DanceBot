@@ -9,6 +9,7 @@ run.sh
 build/
 dist/
 configure.txt
+petdance.zip
 
 # User-specific files
 *.rsuser

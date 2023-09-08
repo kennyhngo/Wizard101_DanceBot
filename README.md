@@ -8,7 +8,7 @@ Although it is against the ToS to be botting and using a third-party software, s
 
 ## Usage
 
-Download and extract the latest executable bundle in the releases [here](https://github.com/kennyhngo/Wizard101_DanceBot/releases).
+Download and extract the latest executable bundle in the releases [here](https://github.com/kennyhngo/Wizard101_DanceBot/releases). When unzipping the file, I recommend you chose the `extract to petdance/` option or your current folder will be filled with files. Do not move anything, including the executable, outside the folder. However, you may create a shortcut of the executable.
 
 ## Instructions
 
