@@ -13,7 +13,7 @@ mss==9.0.1
 numpy==1.25.1
 pefile==2023.2.7
 pip==23.3
-pyinstaller==5.13.0
+pyinstaller==5.13.1
 pyinstaller-hooks-contrib==2023.6
 PyMsgBox==1.0.9
 pyperclip==1.8.2
